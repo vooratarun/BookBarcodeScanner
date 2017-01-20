@@ -30,6 +30,7 @@ import org.json.JSONObject;
 import sample.listup.com.listupsample.R;
 import sample.listup.com.listupsample.models.Book;
 import sample.listup.com.listupsample.utils.AppController;
+import sample.listup.com.listupsample.utils.Helper;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
@@ -39,14 +40,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private EditText ISBNText;
     private static final String ACTION_SCAN = "com.google.zxing.client.android.SCAN";
     private String bookISBN;
-    private String GOOGLE_BOOKS_API = "https://www.googleapis.com/books/v1/volumes?q=isbn:";
     private LinearLayout priceLayout;
     private EditText priceEdit;
     private Button addBookButton;
-
     private Book insertingBook;
-
     private Button testCaseButton;
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,6 +55,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        // setting Fields
         mBarcode = (Button) findViewById(R.id.barcode_scan);
         mISBN = (Button) findViewById(R.id.isbn_code);
         mBarcode.setOnClickListener(this);
@@ -74,25 +75,28 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     public void onClick(View view) {
 
+        // Onclick on buttons
         switch (view.getId()){
             case R.id.barcode_scan :
-                scanBar();
-                //scanBarcode();
-//                Book book = new Book("El monje que vendió su ferrari",100,
-//                        "http://books.google.com/books/content?id=B1DzOQAACAAJ&printsec=frontcover&img=1&zoom=5&source=gbs_api");
-               // insertBookInDB(book);
+                scanBar(); // opens the scan activity
                 break;
+
+            // To get All the books
             case R.id.all_books :
                 Intent intent = new Intent(this,ListAllBookActivity.class);
                 startActivity(intent);
+
+            // To get book details from ISBN code
             case R.id.isbn_code :
                     if(ISBNText.getText().toString().length() > 0) {
+                        Toast.makeText(this, ISBNText.getText().toString(), Toast.LENGTH_SHORT).show();
                         getBookDetails(ISBNText.getText().toString());
                     } else {
                         Toast.makeText(this, "Please Enter code.", Toast.LENGTH_SHORT).show();
                     }
                 break;
 
+            // It inserts book object into database.
             case R.id.addBook :
                 String priceText = priceEdit.getText().toString();
                 if(priceText.length() > 0 ){
@@ -102,16 +106,20 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     Toast.makeText(this, "Please Enter priceEdit..", Toast.LENGTH_SHORT).show();
                 }
                 break;
+
+            // General TestCase
             case R.id.testCase :
                 bookISBN = "9780759521438";
                 getBookDetails("9780759521438");
                 break;
+
             default:
                 break;
         }
     }
 
-    //product barcode mode
+    // product barcode mode. It scans barcode on Product mode
+
     public void scanBar() {
         try {
             //start the scanning activity from the com.google.zxing.client.android.SCAN intent
@@ -124,7 +132,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
-    //alert dialog for downloadDialog
+    //alert dialog for downloadDialog, It will execute if No Scanner found, It installs one.
+
     private static AlertDialog showDialog(final Activity act, CharSequence title,
                                           CharSequence message, CharSequence buttonYes, CharSequence buttonNo) {
         AlertDialog.Builder downloadDialog = new AlertDialog.Builder(act);
@@ -149,33 +158,42 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         return downloadDialog.show();
     }
 
-        //on ActivityResult method
+    //on ActivityResult method. We got a product after scanned
     public void onActivityResult(int requestCode, int resultCode, Intent intent) {
         if (requestCode == 0) {
             if (resultCode == RESULT_OK) {
+                Toast.makeText(this, "Scan Completed..", Toast.LENGTH_SHORT).show();
                 //get the extras that are returned from the intent
                 String contents = intent.getStringExtra("SCAN_RESULT");
                 String format = intent.getStringExtra("SCAN_RESULT_FORMAT");
                 Log.d("ScanResult",contents);
+
+                // We got product ISBN number .
                 getBookDetails(format);
             }
         }
     }
+
+    // This uses google API to fetch bookdata from ISBN numbers.
     private void getBookDetails(String bookISBN) {
 
-        String url = GOOGLE_BOOKS_API+bookISBN;
+        String url = Helper.GOOGLE_BOOKS_API+bookISBN;
+
+        // Volley request to get bookdata json.
         JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, url,
                 new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject response) {
 
                 try {
+                    //On successful response We need to ask the user to enter price.
                     int totalItems = response.getInt("totalItems");
                     if(totalItems > 0) {
                         JSONObject item = response.getJSONArray("items").getJSONObject(0);
                         String title = item.getJSONObject("volumeInfo").getString("title");
                         String imageUrl = item.getJSONObject("volumeInfo").getJSONObject("imageLinks").
                                 getString("smallThumbnail");
+                        // Its Enter price and add book button will be activated.
                         priceLayout.setVisibility(View.VISIBLE);
                         addBookButton.setVisibility(View.VISIBLE);
                         insertingBook  = new Book(title,0,imageUrl);
@@ -186,21 +204,22 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
-
             }
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-
             }
         });
 
         AppController.getInstance().addToRequestQueue(request);
     }
 
+    // Insert the book into database with created JSON object.
     private void insertBookInDB(Book book){
 
         Toast.makeText(this, "inserting book", Toast.LENGTH_SHORT).show();
+
+        //Making Json Object from book data
         JSONObject object = new JSONObject();
         try {
             object.put("bookImage",book.getBookImage());
@@ -210,8 +229,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             e.printStackTrace();
         }
 
-        String url = "http://52.74.62.47:3000/create/book";
-        JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, url,
+        // Posting bookdata object
+        JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, Helper.INSERT_BOOK_URL,
                 object,
                 new Response.Listener<JSONObject>() {
             @Override
@@ -235,7 +254,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
 
-    //    public void scanBarcode() {
+//    public void scanBarcode() {
 //        new IntentIntegrator(this).initiateScan();
 //    }
 

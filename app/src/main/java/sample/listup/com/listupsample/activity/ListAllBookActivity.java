@@ -23,34 +23,32 @@ import sample.listup.com.listupsample.R;
 import sample.listup.com.listupsample.adapter.BookListAdapter;
 import sample.listup.com.listupsample.models.Book;
 import sample.listup.com.listupsample.utils.AppController;
+import sample.listup.com.listupsample.utils.Helper;
 
 public class ListAllBookActivity extends AppCompatActivity {
 
     private ListView  booksListView;
     private BookListAdapter bookListAdapter;
     private List<Book> bookList = new ArrayList<Book>();
-    private static final String BOOKS_URL = "http://52.74.62.47:3000/books";
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_list_all_book);
 
+        // Setting Listview and adapter.
         booksListView = (ListView) findViewById(R.id.books_list_view);
         bookListAdapter = new BookListAdapter(this,bookList);
         booksListView.setAdapter(bookListAdapter);
-        Book book = new Book("El monje que vendió su ferrari",100,
-                "http://books.google.com/books/content?id=B1DzOQAACAAJ&printsec=frontcover&img=1&zoom=5&source=gbs_api");
-        bookList.add(book);
         getBooks();
 
     }
 
+    // It fetches all books stored..
     private void getBooks() {
 
         JsonArrayRequest booksRequest =
-                new JsonArrayRequest(Request.Method.GET, BOOKS_URL,
+                new JsonArrayRequest(Request.Method.GET, Helper.GET_BOOKS_URL,
                         new Response.Listener<JSONArray>() {
             @Override
             public void onResponse(JSONArray response) {
@@ -79,7 +77,6 @@ public class ListAllBookActivity extends AppCompatActivity {
 
             }
         });
-
         AppController.getInstance().addToRequestQueue(booksRequest);
     }
 
