@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">ListupSample</string>
+    <string name="action_settings">Settings</string>
+    <string name="hello_text">Hi This is barcode scanner example</string>
+    <string name="barcode_scan">Barcode</string>
+    <string name="isbn_scan">ISBN</string>
+</resources>
