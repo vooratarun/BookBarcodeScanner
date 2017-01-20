@@ -10,12 +10,14 @@ import com.android.volley.toolbox.Volley;
 
 /**
  * Created by admin on 20-Jan-17.
+ * This file is Application controller Singleton object
  */
 
 public class AppController extends Application {
 
     public static final String TAG = AppController.class.getSimpleName();
 
+    //Volley request Queue
     private RequestQueue mRequestQueue;
     private ImageLoader mImageLoader;
 

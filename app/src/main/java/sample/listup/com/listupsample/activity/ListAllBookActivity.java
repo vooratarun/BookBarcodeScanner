@@ -27,9 +27,11 @@ import sample.listup.com.listupsample.utils.Helper;
 
 public class ListAllBookActivity extends AppCompatActivity {
 
+    //Variabls
     private ListView  booksListView;
     private BookListAdapter bookListAdapter;
     private List<Book> bookList = new ArrayList<Book>();
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,22 +42,23 @@ public class ListAllBookActivity extends AppCompatActivity {
         booksListView = (ListView) findViewById(R.id.books_list_view);
         bookListAdapter = new BookListAdapter(this,bookList);
         booksListView.setAdapter(bookListAdapter);
-        getBooks();
 
+        // It is API fetches books
+        getBooks();
     }
 
     // It fetches all books stored..
     private void getBooks() {
 
+        //GET request to fetch books
         JsonArrayRequest booksRequest =
                 new JsonArrayRequest(Request.Method.GET, Helper.GET_BOOKS_URL,
                         new Response.Listener<JSONArray>() {
             @Override
             public void onResponse(JSONArray response) {
 
-                Toast.makeText(ListAllBookActivity.this, "I got response", Toast.LENGTH_SHORT).show();
+                Toast.makeText(ListAllBookActivity.this, "List is loading..", Toast.LENGTH_SHORT).show();
                 for(int i=0;i<response.length();i++){
-
                     try {
                         JSONObject object = response.getJSONObject(i);
                         String bookImage = object.getString("bookImage");

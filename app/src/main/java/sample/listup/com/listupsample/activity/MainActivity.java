@@ -10,19 +10,17 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
-import com.google.zxing.integration.android.IntentIntegrator;
-import com.google.zxing.integration.android.IntentResult;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -34,19 +32,26 @@ import sample.listup.com.listupsample.utils.Helper;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
-    private Button mBarcode;
-    private Button mISBN;
-    private Button allBooks;
-    private EditText ISBNText;
     private static final String ACTION_SCAN = "com.google.zxing.client.android.SCAN";
-    private String bookISBN;
+
+    //Buttons
+    private Button barcodeBtn;
+    private Button ISBNBtn;
+    private Button allBooksBtn;
+    private Button testCaseBtn;
+    private Button addBookBtn;
+
+    //EditText fields
+    private EditText ISBNEditText;
+    private EditText priceEditText;
+
+    // Layouts
     private LinearLayout priceLayout;
-    private EditText priceEdit;
-    private Button addBookButton;
+    private TextView bookNameTextview;
+
+    //Variables
+    private String bookISBN;
     private Book insertingBook;
-    private Button testCaseButton;
-
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,20 +60,25 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        // setting Fields
-        mBarcode = (Button) findViewById(R.id.barcode_scan);
-        mISBN = (Button) findViewById(R.id.isbn_code);
-        mBarcode.setOnClickListener(this);
-        mISBN.setOnClickListener(this);
-        allBooks = (Button) findViewById(R.id.all_books);
-        allBooks.setOnClickListener(this);
-        ISBNText = (EditText) findViewById(R.id.isbn_text);
+        // setting Fields and listeners on buttons
+        barcodeBtn = (Button) findViewById(R.id.barcode_scan);
+        ISBNBtn = (Button) findViewById(R.id.isbn_code);
+        allBooksBtn = (Button) findViewById(R.id.all_books);
+        addBookBtn = (Button) findViewById(R.id.addBook);
+        testCaseBtn = (Button) findViewById(R.id.testCase);
+        addBookBtn.setOnClickListener(this);
+        barcodeBtn.setOnClickListener(this);
+        ISBNBtn.setOnClickListener(this);
+        allBooksBtn.setOnClickListener(this);
+        testCaseBtn.setOnClickListener(this);
+
+        // setting Layouts
         priceLayout = (LinearLayout) findViewById(R.id.price_layout);
-        priceEdit = (EditText) findViewById(R.id.price);
-        addBookButton = (Button) findViewById(R.id.addBook);
-        addBookButton.setOnClickListener(this);
-        testCaseButton = (Button) findViewById(R.id.testCase);
-        testCaseButton.setOnClickListener(this);
+
+        //Setting Text fields
+        ISBNEditText = (EditText) findViewById(R.id.isbn_text);
+        priceEditText = (EditText) findViewById(R.id.price);
+        bookNameTextview = (TextView) findViewById(R.id.bookname_detected);
     }
 
 
@@ -79,6 +89,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         switch (view.getId()){
             case R.id.barcode_scan :
                 scanBar(); // opens the scan activity
+               // scanBarcode();
                 break;
 
             // To get All the books
@@ -88,22 +99,22 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
             // To get book details from ISBN code
             case R.id.isbn_code :
-                    if(ISBNText.getText().toString().length() > 0) {
-                        Toast.makeText(this, ISBNText.getText().toString(), Toast.LENGTH_SHORT).show();
-                        getBookDetails(ISBNText.getText().toString());
+                    if(ISBNEditText.getText().toString().length() > 0) {
+                        Toast.makeText(this, ISBNEditText.getText().toString(), Toast.LENGTH_SHORT).show();
+                        getBookDetails(ISBNEditText.getText().toString());
                     } else {
                         Toast.makeText(this, "Please Enter code.", Toast.LENGTH_SHORT).show();
                     }
                 break;
 
-            // It inserts book object into database.
+            // It  asks for price and inserts book object into database.
             case R.id.addBook :
-                String priceText = priceEdit.getText().toString();
+                String priceText = priceEditText.getText().toString();
                 if(priceText.length() > 0 ){
                     insertingBook.setBookPrice(Integer.parseInt(priceText));
                     insertBookInDB(insertingBook);
                 } else {
-                    Toast.makeText(this, "Please Enter priceEdit..", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, "Please Enter priceEditText..", Toast.LENGTH_SHORT).show();
                 }
                 break;
 
@@ -119,7 +130,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     // product barcode mode. It scans barcode on Product mode
-
     public void scanBar() {
         try {
             //start the scanning activity from the com.google.zxing.client.android.SCAN intent
@@ -133,7 +143,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     //alert dialog for downloadDialog, It will execute if No Scanner found, It installs one.
-
     private static AlertDialog showDialog(final Activity act, CharSequence title,
                                           CharSequence message, CharSequence buttonYes, CharSequence buttonNo) {
         AlertDialog.Builder downloadDialog = new AlertDialog.Builder(act);
@@ -168,7 +177,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 String format = intent.getStringExtra("SCAN_RESULT_FORMAT");
                 Log.d("ScanResult",contents);
 
-                // We got product ISBN number .
+                // We got product ISBN number and so get googlebook details
                 getBookDetails(format);
             }
         }
@@ -177,7 +186,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     // This uses google API to fetch bookdata from ISBN numbers.
     private void getBookDetails(String bookISBN) {
 
-        String url = Helper.GOOGLE_BOOKS_API+bookISBN;
+        String url = Helper.GOOGLE_BOOKS_API + bookISBN;
 
         // Volley request to get bookdata json.
         JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, url,
@@ -195,7 +204,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                 getString("smallThumbnail");
                         // Its Enter price and add book button will be activated.
                         priceLayout.setVisibility(View.VISIBLE);
-                        addBookButton.setVisibility(View.VISIBLE);
+                        addBookBtn.setVisibility(View.VISIBLE);
+                        bookNameTextview.setText(title);
                         insertingBook  = new Book(title,0,imageUrl);
                     }else {
                         Toast.makeText(MainActivity.this, "No book found with this ISBN", Toast.LENGTH_SHORT).show();
@@ -237,8 +247,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             public void onResponse(JSONObject response) {
                 try {
                     Toast.makeText(MainActivity.this, response.getString("result"), Toast.LENGTH_SHORT).show();
+                    ISBNEditText.setText("");
                     priceLayout.setVisibility(View.GONE);
-                    addBookButton.setVisibility(View.GONE);
+                    addBookBtn.setVisibility(View.GONE);
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }

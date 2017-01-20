@@ -24,6 +24,7 @@ import sample.listup.com.listupsample.utils.AppController;
 
 public class BookListAdapter extends BaseAdapter {
 
+    //Class Variables
     private Activity activity;
     private LayoutInflater inflater;
     private List<Book> bookItems;

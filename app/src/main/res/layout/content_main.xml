@@ -53,7 +53,7 @@
             android:id="@+id/isbn_text"
             android:layout_width="200dp"
             android:layout_height="wrap_content"
-            android:hint="10 digit ISBN" />
+            android:hint="10 or 13  digit ISBN" />
 
         <Button
             android:text="SEARCH"
@@ -63,8 +63,16 @@
             android:layout_height="wrap_content" />
     </LinearLayout>
 
+    <TextView
+        android:id="@+id/bookname_detected"
+        android:text=""
+        android:gravity="center"
+        android:layout_gravity="center"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
 
     <LinearLayout
+        android:layout_marginTop="5dp"
         android:id="@+id/price_layout"
         android:visibility="gone"
         android:gravity="center"
@@ -103,7 +111,7 @@
         android:layout_height="wrap_content" />
 
     <Button
-        android:text="Click"
+        android:text="Test"
         android:id="@+id/testCase"
         android:gravity="center"
         android:layout_gravity="center"
