@@ -95,7 +95,7 @@
 
     <Button
         android:visibility="gone"
-        android:id="@+id/addBook"
+        android:id="@+id/add_book"
         style="@style/buttonStyle"
         android:layout_gravity="center"
         android:gravity="center"
@@ -112,7 +112,7 @@
 
     <Button
         android:text="Test"
-        android:id="@+id/testCase"
+        android:id="@+id/test_case"
         android:gravity="center"
         android:layout_gravity="center"
         android:layout_width="wrap_content"

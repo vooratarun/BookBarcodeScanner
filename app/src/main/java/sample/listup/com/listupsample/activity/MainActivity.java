@@ -64,8 +64,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         barcodeBtn = (Button) findViewById(R.id.barcode_scan);
         ISBNBtn = (Button) findViewById(R.id.isbn_code);
         allBooksBtn = (Button) findViewById(R.id.all_books);
-        addBookBtn = (Button) findViewById(R.id.addBook);
-        testCaseBtn = (Button) findViewById(R.id.testCase);
+        addBookBtn = (Button) findViewById(R.id.add_book);
+        testCaseBtn = (Button) findViewById(R.id.test_case);
         addBookBtn.setOnClickListener(this);
         barcodeBtn.setOnClickListener(this);
         ISBNBtn.setOnClickListener(this);
@@ -108,7 +108,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
 
             // It  asks for price and inserts book object into database.
-            case R.id.addBook :
+            case R.id.add_book :
                 String priceText = priceEditText.getText().toString();
                 if(priceText.length() > 0 ){
                     insertingBook.setBookPrice(Integer.parseInt(priceText));
@@ -119,7 +119,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
 
             // General TestCase
-            case R.id.testCase :
+            case R.id.test_case :
                 bookISBN = "9780759521438";
                 getBookDetails("9780759521438");
                 break;
