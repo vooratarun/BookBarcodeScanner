@@ -203,10 +203,19 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     Toast.makeText(this, "Cancelled", Toast.LENGTH_LONG).show();
                 } else {
                     Log.d("MainActivity", "Scanned");
-                    Toast.makeText(this, "Scanned: " + result.getContents(), Toast.LENGTH_LONG).show();
+                    String scanContent = result.getContents();
+                    String scanFormat = result.getFormatName();
+
+                    if(scanContent != null && scanFormat != null && scanFormat.equalsIgnoreCase("EAN_13")){
+                        Toast.makeText(this, "Scanned: " + result.getContents(), Toast.LENGTH_LONG).show();
+                        getBookDetails(result.getContents());
+                    } else{
+                        Toast toast = Toast.makeText(getApplicationContext(),
+                                "Not a valid scan!", Toast.LENGTH_SHORT);
+                        toast.show();
+                    }
                 }
             } else {
-                // This is important, otherwise the result will not be passed to the fragment
                 super.onActivityResult(requestCode, resultCode, intent);
             }
         }
