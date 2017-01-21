@@ -31,4 +31,6 @@ dependencies {
     compile 'com.journeyapps:zxing-android-embedded:3.4.0'
 
 
+
+
 }

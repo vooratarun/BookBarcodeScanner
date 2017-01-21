@@ -21,10 +21,12 @@ import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
+import com.google.zxing.integration.android.IntentIntegrator;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import me.dm7.barcodescanner.zxing.ZXingScannerView;
 import sample.listup.com.listupsample.R;
 import sample.listup.com.listupsample.models.Book;
 import sample.listup.com.listupsample.utils.AppController;
@@ -53,6 +55,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private String bookISBN;
     private Book insertingBook;
 
+    //ZXing Scannview
+    private ZXingScannerView mScannerView;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -79,17 +85,26 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         ISBNEditText = (EditText) findViewById(R.id.isbn_text);
         priceEditText = (EditText) findViewById(R.id.price);
         bookNameTextview = (TextView) findViewById(R.id.bookname_detected);
+
+
     }
 
 
     @Override
     public void onClick(View view) {
 
-        // Onclick on buttons
+        // Onclick on buttons. opens the scan activity
         switch (view.getId()){
             case R.id.barcode_scan :
-                scanBar(); // opens the scan activity
-               // scanBarcode();
+
+                // It uses Already pre installed app to scan barcode . it asks to install one app from playstore
+                scanBarWithPreinstalledApp();
+
+                 // It uses the barcode scanner library to get results. This library included in build.gradle.
+                // scanBarcodeUsingLibrary();
+
+                mScannerView = new ZXingScannerView(this);   // Programmatically initialize the scanner view
+                setContentView(mScannerView);                // Set the scanner view as the content view
                 break;
 
             // To get All the books
@@ -130,7 +145,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     // product barcode mode. It scans barcode on Product mode
-    public void scanBar() {
+    // If no scanner available It downloads one from Google play store.. and We can use thirdParty library also
+    public void scanBarWithPreinstalledApp() {
         try {
             //start the scanning activity from the com.google.zxing.client.android.SCAN intent
             Intent intent = new Intent(ACTION_SCAN);
@@ -168,6 +184,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     //on ActivityResult method. We got a product after scanned
+
     public void onActivityResult(int requestCode, int resultCode, Intent intent) {
         if (requestCode == 0) {
             if (resultCode == RESULT_OK) {
@@ -264,10 +281,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         AppController.getInstance().addToRequestQueue(request);
     }
 
+// Code using Library
 
-//    public void scanBarcode() {
-//        new IntentIntegrator(this).initiateScan();
-//    }
+    public void scanBarcodeUsingLibrary() {
+        new IntentIntegrator(this).initiateScan();
+    }
 
 
 //    @Override
