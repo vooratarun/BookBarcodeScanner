@@ -14,21 +14,7 @@
     tools:context="sample.listup.com.listupsample.activity.MainActivity"
     tools:showIn="@layout/activity_main">
 
-    <TextView
-        android:textStyle="bold"
-        android:textSize="15sp"
-        android:layout_gravity="center_horizontal"
-        android:id="@+id/description"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/hello_text"/>
 
-    <TextView
-        android:layout_marginTop="20dp"
-        android:layout_gravity="center"
-        android:text="scan through barcode scanner"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
 
     <Button
         style="@style/buttonStyle"
@@ -39,7 +25,7 @@
 
 
     <LinearLayout
-        android:layout_marginTop="10dp"
+        android:layout_marginTop="30dp"
         android:gravity="center"
         android:layout_gravity="center_horizontal"
         android:orientation="horizontal"
@@ -81,7 +67,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
         <TextView
-            android:text="Enter Price"
+            android:text="Enter your Price"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
         <EditText
@@ -93,6 +79,7 @@
     </LinearLayout>
 
 
+
     <Button
         android:visibility="gone"
         android:id="@+id/add_book"
@@ -102,22 +89,6 @@
         android:text="Add book"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
-
-    <TextView
-        android:layout_marginTop="10dp"
-        android:layout_gravity="center"
-        android:text="Sample text case for flow with ISBN : 9789685960335"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
-
-    <Button
-        android:text="Test"
-        android:id="@+id/test_case"
-        android:gravity="center"
-        android:layout_gravity="center"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
-
 
     <Button
         android:layout_marginTop="30dp"

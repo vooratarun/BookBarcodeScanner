@@ -14,6 +14,7 @@
 
     <!-- Book Title -->
     <TextView
+        android:text="title"
         android:id="@+id/title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -22,16 +23,37 @@
         android:textSize="@dimen/title"
         android:textStyle="bold" />
 
-    <!-- Book Price -->
     <TextView
-        android:id="@+id/price"
+        android:text="Tarun voora"
+        android:id="@+id/author"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/title"
+        android:layout_marginTop="1dip"
+        android:layout_toRightOf="@id/thumbnail"
+        android:layout_below="@+id/title"
+        android:textSize="@dimen/price" />
+
+    <!-- Book Amazon Price -->
+    <TextView
+        android:text="123 RS."
+        android:id="@+id/amazon_price"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/author"
         android:layout_marginTop="1dip"
         android:layout_toRightOf="@+id/thumbnail"
         android:textSize="@dimen/price" />
 
+    <TextView
+
+        android:text="1234 RS."
+        android:id="@+id/user_price"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/amazon_price"
+        android:layout_marginTop="1dip"
+        android:layout_toRightOf="@+id/thumbnail"
+        android:textSize="@dimen/price" />
 
 
 </RelativeLayout>

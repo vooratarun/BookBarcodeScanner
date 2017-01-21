@@ -2,7 +2,6 @@ package sample.listup.com.listupsample.adapter;
 
 import android.app.Activity;
 import android.content.Context;
-import android.support.v7.app.ActionBar;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -65,17 +64,19 @@ public class BookListAdapter extends BaseAdapter {
         NetworkImageView thumbNail = (NetworkImageView) view
                 .findViewById(R.id.thumbnail);
         TextView title = (TextView) view.findViewById(R.id.title);
-        TextView price = (TextView) view.findViewById(R.id.price);
-
+        TextView author = (TextView) view.findViewById(R.id.author);
+        TextView amazonPrice = (TextView) view.findViewById(R.id.amazon_price);
+        TextView userPrice = (TextView) view.findViewById(R.id.user_price);
 
         // getting book data for the row
-        Book b = bookItems.get(i);
+        Book book = bookItems.get(i);
 
         // setting values
-        thumbNail.setImageUrl(b.getBookImage(), imageLoader);
-        title.setText(b.getBookTitle());
-        price.setText(String.valueOf(b.getBookPrice()) +" rupees ");
-
+        thumbNail.setImageUrl(book.getImage(), imageLoader);
+        title.setText(book.getTitle());
+        author.setText(book.getAuthor());
+        amazonPrice.setText("Amazon price : " + book.getAmazonPrice());
+        userPrice.setText("User Price : " + String.valueOf(book.getUserPrice()));
 
         return view;
     }

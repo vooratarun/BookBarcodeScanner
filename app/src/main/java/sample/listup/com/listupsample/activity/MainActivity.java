@@ -40,7 +40,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private Button barcodeBtn;
     private Button ISBNBtn;
     private Button allBooksBtn;
-    private Button testCaseBtn;
     private Button addBookBtn;
 
     //EditText fields
@@ -52,7 +51,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private TextView bookNameTextview;
 
     //Variables
-    private String bookISBN;
     private Book insertingBook;
 
 
@@ -68,12 +66,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         ISBNBtn = (Button) findViewById(R.id.isbn_code);
         allBooksBtn = (Button) findViewById(R.id.all_books);
         addBookBtn = (Button) findViewById(R.id.add_book);
-        testCaseBtn = (Button) findViewById(R.id.test_case);
         addBookBtn.setOnClickListener(this);
         barcodeBtn.setOnClickListener(this);
         ISBNBtn.setOnClickListener(this);
         allBooksBtn.setOnClickListener(this);
-        testCaseBtn.setOnClickListener(this);
 
         // setting Layouts
         priceLayout = (LinearLayout) findViewById(R.id.price_layout);
@@ -82,10 +78,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         ISBNEditText = (EditText) findViewById(R.id.isbn_text);
         priceEditText = (EditText) findViewById(R.id.price);
         bookNameTextview = (TextView) findViewById(R.id.bookname_detected);
-
-
     }
-
 
     @Override
     public void onClick(View view) {
@@ -93,10 +86,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         // Onclick on buttons. opens the scan activity
         switch (view.getId()){
             case R.id.barcode_scan :
-
                 // It uses Already pre installed app to scan barcode . it asks to install one app from playstore
                 scanBarWithPreinstalledApp();
-
                  // It uses the barcode scanner library to get results. This library included in build.gradle.
                 // scanBarcodeUsingLibrary();
 
@@ -111,7 +102,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             case R.id.isbn_code :
                     if(ISBNEditText.getText().toString().length() > 0) {
                         Toast.makeText(this, ISBNEditText.getText().toString(), Toast.LENGTH_SHORT).show();
-                        getBookDetails(ISBNEditText.getText().toString());
+                        bookDetailsByISBN(ISBNEditText.getText().toString());
                     } else {
                         Toast.makeText(this, "Please Enter code.", Toast.LENGTH_SHORT).show();
                     }
@@ -121,7 +112,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             case R.id.add_book :
                 String priceText = priceEditText.getText().toString();
                 if(priceText.length() > 0 ){
-                    insertingBook.setBookPrice(Integer.parseInt(priceText));
+                    insertingBook.setUserPrice(Integer.parseInt(priceText));
                     insertBookInDB(insertingBook);
                 } else {
                     Toast.makeText(this, "Please Enter priceEditText..", Toast.LENGTH_SHORT).show();
@@ -129,10 +120,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
 
             // General TestCase
-            case R.id.test_case :
-                bookISBN = "9780759521438";
-                getBookDetails("9780759521438");
-                break;
+
 
             default:
                 break;
@@ -154,9 +142,121 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
+    // using library
+    public void scanBarcodeUsingLibrary() {
+        new IntentIntegrator(this).initiateScan();
+    }
+
+    private void bookDetailsByISBN(String bookISBN) {
+
+        String url = Helper.BOOK_DETAILS + bookISBN;
+        JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, url, new Response.Listener<JSONObject>() {
+            @Override
+            public void onResponse(JSONObject response) {
+
+                boolean hasResponse = false;
+                try {
+                    hasResponse = response.getBoolean("response");
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+
+                if(hasResponse) {
+                    String title = "Missed";
+                    String image = "";
+                    String author = "Missed";
+                    String amazonPrice = "Missed";
+
+                    try {
+                         title = response.getString("title");
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+
+                    try {
+                         image = response.getString("imageUrl");
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+
+                    try {
+                         author = response.getString("author");
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                    try {
+                         amazonPrice = response.getString("amazonPrice");
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+
+                    priceLayout.setVisibility(View.VISIBLE);
+                    addBookBtn.setVisibility(View.VISIBLE);
+                    bookNameTextview.setText(title + " , " + author + " , " + amazonPrice);
+                    insertingBook = new Book(title, author, image, amazonPrice, 0);
+                }
+                else {
+                    Toast.makeText(MainActivity.this, "Book Not found. Please Enter some Indian book ISBN",
+                            Toast.LENGTH_SHORT).show();
+                }
+
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+
+            }
+        });
+        AppController.getInstance().addToRequestQueue(request);
+    }
+
+    // Insert the book into database with created JSON object.
+    private void insertBookInDB(Book book){
+
+        Toast.makeText(this, "inserting book", Toast.LENGTH_SHORT).show();
+
+        //Making Json Object from book data
+        JSONObject object = new JSONObject();
+        try {
+            object.put("image",book.getImage());
+            object.put("title",book.getTitle());
+            object.put("amazonPrice",book.getAmazonPrice());
+            object.put("userPrice",book.getUserPrice());
+            object.put("author",book.getAuthor());
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        // Posting bookdata object
+        JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, Helper.INSERT_BOOK_URL,
+                object,
+                new Response.Listener<JSONObject>() {
+            @Override
+            public void onResponse(JSONObject response) {
+                try {
+                    Toast.makeText(MainActivity.this, response.getString("result"), Toast.LENGTH_SHORT).show();
+                    priceLayout.setVisibility(View.GONE);
+                    addBookBtn.setVisibility(View.GONE);
+                    ISBNEditText.setText("");
+                    priceEditText.setText("");
+                    bookNameTextview.setText("");
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.d("error",error.toString());
+                Toast.makeText(MainActivity.this, "error", Toast.LENGTH_SHORT).show();
+            }
+        });
+        AppController.getInstance().addToRequestQueue(request);
+    }
+
     //alert dialog for downloadDialog, It will execute if No Scanner found, It installs one.
     private  AlertDialog showDialog(final Activity act, CharSequence title,
-                                          CharSequence message, CharSequence buttonYes, CharSequence buttonNo) {
+                                    CharSequence message, CharSequence buttonYes, CharSequence buttonNo) {
         final AlertDialog.Builder downloadDialog = new AlertDialog.Builder(act);
         downloadDialog.setTitle(title);
         downloadDialog.setMessage(message);
@@ -180,8 +280,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         return downloadDialog.show();
     }
 
+
     //on ActivityResult method. We got a product after scanned
 
+    @Override
     public void onActivityResult(int requestCode, int resultCode, Intent intent) {
         if (requestCode == 0) {
             if (resultCode == RESULT_OK) {
@@ -192,14 +294,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 Log.d("ScanResult",contents);
 
                 // We got product ISBN number and so get googlebook details
-                getBookDetails(format);
+                bookDetailsByISBN(contents);
             }
         } else {
 
             IntentResult result = IntentIntegrator.parseActivityResult(requestCode, resultCode, intent);
             if(result != null) {
                 if(result.getContents() == null) {
-                    Log.d("MainActivity", "Cancelled scan");
                     Toast.makeText(this, "Cancelled", Toast.LENGTH_LONG).show();
                 } else {
                     Log.d("MainActivity", "Scanned");
@@ -207,11 +308,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     String scanFormat = result.getFormatName();
 
                     if(scanContent != null && scanFormat != null && scanFormat.equalsIgnoreCase("EAN_13")){
-                        Toast.makeText(this, "Scanned: " + result.getContents(), Toast.LENGTH_LONG).show();
-                        getBookDetails(result.getContents());
+                        Toast.makeText(this, "Scanned: " + scanContent, Toast.LENGTH_LONG).show();
+                        bookDetailsByISBN(scanContent);
                     } else{
-                        Toast toast = Toast.makeText(getApplicationContext(),
-                                "Not a valid scan!", Toast.LENGTH_SHORT);
+                        Toast toast = Toast.makeText(getApplicationContext(), "Not a valid scan!", Toast.LENGTH_SHORT);
                         toast.show();
                     }
                 }
@@ -220,114 +320,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
         }
     }
-
-    // This uses google API to fetch bookdata from ISBN numbers.
-    private void getBookDetails(String bookISBN) {
-
-        String url = Helper.GOOGLE_BOOKS_API + bookISBN;
-
-        // Volley request to get bookdata json.
-        JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, url,
-                new Response.Listener<JSONObject>() {
-            @Override
-            public void onResponse(JSONObject response) {
-
-                try {
-                    //On successful response We need to ask the user to enter price.
-                    int totalItems = response.getInt("totalItems");
-                    if(totalItems > 0) {
-                        JSONObject item = response.getJSONArray("items").getJSONObject(0);
-                        String title = item.getJSONObject("volumeInfo").getString("title");
-                        String imageUrl = item.getJSONObject("volumeInfo").getJSONObject("imageLinks").
-                                getString("smallThumbnail");
-                        // Its Enter price and add book button will be activated.
-                        priceLayout.setVisibility(View.VISIBLE);
-                        addBookBtn.setVisibility(View.VISIBLE);
-                        bookNameTextview.setText(title);
-                        insertingBook  = new Book(title,0,imageUrl);
-                    }else {
-                        Toast.makeText(MainActivity.this, "No book found with this ISBN", Toast.LENGTH_SHORT).show();
-                    }
-
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-            }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-            }
-        });
-
-        AppController.getInstance().addToRequestQueue(request);
-    }
-
-    // Insert the book into database with created JSON object.
-    private void insertBookInDB(Book book){
-
-        Toast.makeText(this, "inserting book", Toast.LENGTH_SHORT).show();
-
-        //Making Json Object from book data
-        JSONObject object = new JSONObject();
-        try {
-            object.put("bookImage",book.getBookImage());
-            object.put("bookName",book.getBookTitle());
-            object.put("bookPrice",book.getBookPrice());
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-
-        // Posting bookdata object
-        JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, Helper.INSERT_BOOK_URL,
-                object,
-                new Response.Listener<JSONObject>() {
-            @Override
-            public void onResponse(JSONObject response) {
-                try {
-                    Toast.makeText(MainActivity.this, response.getString("result"), Toast.LENGTH_SHORT).show();
-                    ISBNEditText.setText("");
-                    priceLayout.setVisibility(View.GONE);
-                    addBookBtn.setVisibility(View.GONE);
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-            }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                Log.d("error",error.toString());
-                Toast.makeText(MainActivity.this, "error", Toast.LENGTH_SHORT).show();
-            }
-        });
-        AppController.getInstance().addToRequestQueue(request);
-    }
-
-// Code using Library
-
-    public void scanBarcodeUsingLibrary() {
-
-        new IntentIntegrator(this).initiateScan();
-
-    }
-
-
-//    @Override
-//    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-//        IntentResult result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
-//        if(result != null) {
-//            if(result.getContents() == null) {
-//                Log.d("MainActivity", "Cancelled scan");
-//                Toast.makeText(this, "Cancelled", Toast.LENGTH_LONG).show();
-//            } else {
-//                Log.d("MainActivity", "Scanned");
-//                bookISBN = result.getContents();
-//                getBookDetails(bookISBN);
-//                Toast.makeText(this, "Scanned: " + result.getContents(), Toast.LENGTH_LONG).show();
-//            }
-//        } else {
-//            // This is important, otherwise the result will not be passed to the fragment
-//            super.onActivityResult(requestCode, resultCode, data);
-//        }
-//    }
-
 }
+
+

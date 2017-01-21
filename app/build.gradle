@@ -29,8 +29,6 @@ dependencies {
     testCompile 'junit:junit:4.12'
     compile 'com.mcxiaoke.volley:library:1.0.19'
     compile 'com.journeyapps:zxing-android-embedded:3.4.0'
-
-
-
-
+    compile 'com.github.smart-fun:XmlToJson:1.2.0'
+    compile group: 'commons-codec', name: 'commons-codec', version: '1.5'
 }

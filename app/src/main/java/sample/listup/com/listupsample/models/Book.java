@@ -1,46 +1,64 @@
 package sample.listup.com.listupsample.models;
 
-import java.util.TimerTask;
-
 /**
  * Created by admin on 20-Jan-17.
  */
 
 public class Book {
 
-    private String bookTitle;
-    private int bookPrice;
-    private String bookImage;
+    private String title;
+    private String amazonPrice;
+    private String image;
+    private String author;
+    private int userPrice;
 
-    public Book(String bookTitle,int bookPrice, String bookImage){
 
-        this.bookTitle = bookTitle;
-        this.bookPrice = bookPrice;
-        this.bookImage = bookImage;
+    public Book(String title,String author, String image,String amazonPrice,int userPrice){
 
+        this.title = title;
+        this.amazonPrice = amazonPrice;
+        this.author = author;
+        this.image = image;
+        this.userPrice = userPrice;
     }
 
-    public String getBookTitle() {
-        return bookTitle;
+    public String getTitle() {
+        return title;
     }
 
-    public void setBookTitle(String bookTitle) {
-        this.bookTitle = bookTitle;
+    public void setTitle(String title) {
+        this.title = title;
     }
 
-    public int getBookPrice() {
-        return bookPrice;
+    public String getAmazonPrice() {
+        return amazonPrice;
     }
 
-    public void setBookPrice(int bookPrice) {
-        this.bookPrice = bookPrice;
+    public void setAmazonPrice(String  amazonPrice) {
+        this.amazonPrice = amazonPrice;
     }
 
-    public String getBookImage() {
-        return bookImage;
+    public String getImage() {
+        return image;
     }
 
-    public void setBookImage(String bookImage) {
-        this.bookImage = bookImage;
+    public void setImage(String image) {
+        this.image = image;
+    }
+
+    public String getAuthor() {
+        return author;
+    }
+
+    public void setAuthor(String author) {
+        this.author = author;
+    }
+
+    public int getUserPrice() {
+        return userPrice;
+    }
+
+    public void setUserPrice(int userPrice) {
+        this.userPrice = userPrice;
     }
 }

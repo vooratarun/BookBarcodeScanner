@@ -61,10 +61,12 @@ public class ListAllBookActivity extends AppCompatActivity {
                 for(int i=0;i<response.length();i++){
                     try {
                         JSONObject object = response.getJSONObject(i);
-                        String bookImage = object.getString("bookImage");
-                        String bookTitle = object.getString("bookName");
-                        int bookPrice = object.getInt("bookPrice");
-                        Book b  = new Book(bookTitle,bookPrice,bookImage);
+                        String bookImage = object.getString("image");
+                        String bookTitle = object.getString("title");
+                        String bookPrice = object.getString("amazonPrice");
+                        int userPrice = object.getInt("userPrice");
+                        String author = object.getString("author");
+                        Book b  = new Book(bookTitle,author,bookImage,bookPrice,userPrice);
                         bookList.add(b);
 
                     } catch (JSONException e) {
