@@ -22,11 +22,11 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.google.zxing.integration.android.IntentIntegrator;
+import com.google.zxing.integration.android.IntentResult;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import me.dm7.barcodescanner.zxing.ZXingScannerView;
 import sample.listup.com.listupsample.R;
 import sample.listup.com.listupsample.models.Book;
 import sample.listup.com.listupsample.utils.AppController;
@@ -54,9 +54,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     //Variables
     private String bookISBN;
     private Book insertingBook;
-
-    //ZXing Scannview
-    private ZXingScannerView mScannerView;
 
 
     @Override
@@ -103,8 +100,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                  // It uses the barcode scanner library to get results. This library included in build.gradle.
                 // scanBarcodeUsingLibrary();
 
-                mScannerView = new ZXingScannerView(this);   // Programmatically initialize the scanner view
-                setContentView(mScannerView);                // Set the scanner view as the content view
                 break;
 
             // To get All the books
@@ -154,14 +149,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             startActivityForResult(intent, 0);
         } catch (ActivityNotFoundException anfe) {
             //on catch, show the download dialog
-            showDialog(MainActivity.this, "No Scanner Found", "Download a scanner code activity?", "Yes", "No").show();
+            showDialog(MainActivity.this, "No Scanner Found",
+                    "Download a scanner code App? or use inbuilt app ?", "APP", "INBUILT").show();
         }
     }
 
     //alert dialog for downloadDialog, It will execute if No Scanner found, It installs one.
-    private static AlertDialog showDialog(final Activity act, CharSequence title,
+    private  AlertDialog showDialog(final Activity act, CharSequence title,
                                           CharSequence message, CharSequence buttonYes, CharSequence buttonNo) {
-        AlertDialog.Builder downloadDialog = new AlertDialog.Builder(act);
+        final AlertDialog.Builder downloadDialog = new AlertDialog.Builder(act);
         downloadDialog.setTitle(title);
         downloadDialog.setMessage(message);
         downloadDialog.setPositiveButton(buttonYes, new DialogInterface.OnClickListener() {
@@ -177,7 +173,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         });
         downloadDialog.setNegativeButton(buttonNo, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialogInterface, int i) {
-                Toast.makeText(act, "cancelled", Toast.LENGTH_SHORT).show();
+                Toast.makeText(act, "Use Scanbar library", Toast.LENGTH_SHORT).show();
+                scanBarcodeUsingLibrary();
             }
         });
         return downloadDialog.show();
@@ -196,6 +193,21 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
                 // We got product ISBN number and so get googlebook details
                 getBookDetails(format);
+            }
+        } else {
+
+            IntentResult result = IntentIntegrator.parseActivityResult(requestCode, resultCode, intent);
+            if(result != null) {
+                if(result.getContents() == null) {
+                    Log.d("MainActivity", "Cancelled scan");
+                    Toast.makeText(this, "Cancelled", Toast.LENGTH_LONG).show();
+                } else {
+                    Log.d("MainActivity", "Scanned");
+                    Toast.makeText(this, "Scanned: " + result.getContents(), Toast.LENGTH_LONG).show();
+                }
+            } else {
+                // This is important, otherwise the result will not be passed to the fragment
+                super.onActivityResult(requestCode, resultCode, intent);
             }
         }
     }
@@ -284,7 +296,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 // Code using Library
 
     public void scanBarcodeUsingLibrary() {
+
         new IntentIntegrator(this).initiateScan();
+
     }
 
 
